@@ -161,42 +161,36 @@
 
 
 
-
-
-
-
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 
-// LOAD ENV
 dotenv.config();
 
-// APP
 const app = express();
 
-/* ======================
-   ENV CHECK
-====================== */
 console.log("ENV CHECK MONGO_URI:", process.env.MONGO_URI);
+
+const connectDB = require("./config/db");
 
 /* ======================
    DB CONNECT
 ====================== */
-const connectDB = require("./config/db");
+connectDB();
 
 /* ======================
    CORS FIX
 ====================== */
 app.use(
   cors({
-    origin: true,
-    credentials: true,
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors());
 
 /* ======================
    BODY PARSER
@@ -209,14 +203,6 @@ app.use(express.urlencoded({ extended: true }));
 ====================== */
 app.use((req, res, next) => {
   console.log(`📩 GLOBAL HIT -> ${req.method} ${req.url}`);
-  next();
-});
-
-/* ======================
-   PROPERTY DEBUG LOGGER
-====================== */
-app.use("/api/properties", (req, res, next) => {
-  console.log("🏠 PROPERTY ROUTE HIT");
   next();
 });
 
@@ -289,16 +275,6 @@ app.use((err, req, res, next) => {
 ====================== */
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  try {
-    await connectDB();
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("🔥 Failed to start server:", error);
-  }
-};
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
